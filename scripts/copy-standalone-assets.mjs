@@ -1,4 +1,4 @@
-import { cpSync, existsSync } from "node:fs";
+import { cpSync, existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
@@ -47,7 +47,6 @@ export function copyStandaloneAssets({ projectRoot = process.cwd(), distDir = pr
     if (!existsSync(nextCliDir) && existsSync(rootNextCli)) {
       cpSync(rootNextCli, nextCliDir, { recursive: true });
     }
-    const { writeFileSync, mkdirSync } = await import("node:fs");
     if (!existsSync(nextCliDir)) mkdirSync(nextCliDir, { recursive: true });
     writeFileSync(resolve(nextCliDir, "next-test.js"), `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.SUPPORTED_TEST_RUNNERS_LIST = ["playwright"];\nexports.nextTest = async function () {};\n`, "utf8");
     if (!existsSync(nextLibDir)) mkdirSync(nextLibDir, { recursive: true });
