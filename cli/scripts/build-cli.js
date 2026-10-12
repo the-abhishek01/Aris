@@ -265,11 +265,40 @@ function buildCliPackage() {
   // Ensure next/dist/cli is present (required by next/dist/server/config-schema.js)
   const nextCliSrc = path.join(appDir, "node_modules", "next", "dist", "cli");
   const nextCliDest = path.join(cliAppDir, "node_modules", "next", "dist", "cli");
-  if (fs.existsSync(nextCliSrc) && !fs.existsSync(nextCliDest)) {
+  if (fs.existsSync(nextCliSrc)) {
     copyRecursive(nextCliSrc, nextCliDest);
     console.log("✅ Bundled next/dist/cli");
   }
-  console.log("");
+
+  // Next.js standalone fix: next/dist/server/config-schema.js imports SUPPORTED_TEST_RUNNERS_LIST
+  // from ../cli/next-test. In Next.js >=16.3.6 / 16.4+, next-test.js requires
+  // ../lib/warn-missing-react-dependencies and other dev tools that are excluded from
+  // standalone output traces. Stub next-test.js so the server schema loads cleanly without
+  // pulling unbundled dev tools into the production runtime.
+  const nextTestDest = path.join(nextCliDest, "next-test.js");
+  fs.mkdirSync(nextCliDest, { recursive: true });
+  fs.writeFileSync(
+    nextTestDest,
+    `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.SUPPORTED_TEST_RUNNERS_LIST = ["playwright"];\nexports.nextTest = async function () {};\n`,
+    "utf8"
+  );
+  console.log("✅ Stubbed next/dist/cli/next-test.js (prevents untraced dev dependency crashes)");
+
+  // Belt-and-suspenders: also ensure next/dist/lib/warn-missing-react-dependencies.js exists
+  const nextLibDest = path.join(cliAppDir, "node_modules", "next", "dist", "lib");
+  const warnDepDest = path.join(nextLibDest, "warn-missing-react-dependencies.js");
+  const warnDepSrc = path.join(appDir, "node_modules", "next", "dist", "lib", "warn-missing-react-dependencies.js");
+  fs.mkdirSync(nextLibDest, { recursive: true });
+  if (fs.existsSync(warnDepSrc)) {
+    fs.copyFileSync(warnDepSrc, warnDepDest);
+  } else {
+    fs.writeFileSync(
+      warnDepDest,
+      `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.warnMissingReactDependencies = function () {};\n`,
+      "utf8"
+    );
+  }
+  console.log("✅ Ensured next/dist/lib/warn-missing-react-dependencies.js exists\n");
 
   // Step 4: Copy static files
   console.log("4️⃣  Copying static files...");

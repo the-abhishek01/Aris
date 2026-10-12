@@ -149,6 +149,9 @@ if [ ! -f "cli/app/custom-server.js" ] && [ ! -f "cli/app/server.js" ]; then
   node cli/scripts/build-cli.js
 fi
 
+# Ensure Next.js standalone runtime compatibility
+node -e "try { require('./cli/hooks/nextRuntime').ensureNextRuntime(); } catch {}" 2>/dev/null || true
+
 # Set up global CLI commands: aris and 9router
 mkdir -p "$BIN_DIR"
 

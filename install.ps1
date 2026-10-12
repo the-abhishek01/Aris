@@ -93,6 +93,9 @@ if (-not (Test-Path $ServerFile)) {
     & node cli\scripts\build-cli.js
 }
 
+# Ensure Next.js standalone runtime compatibility
+& node -e "try { require('./cli/hooks/nextRuntime').ensureNextRuntime(); } catch {}" 2>$null
+
 # 7. Create Global CLI Launcher Commands
 $BinDir = "$env:USERPROFILE\.local\bin"
 if (-not (Test-Path $BinDir)) {

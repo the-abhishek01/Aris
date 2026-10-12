@@ -151,7 +151,62 @@ http.createServer = (...args) => {
   return server;
 };
 
+// Self-heal Next.js 16 standalone bug: config-schema.js imports SUPPORTED_TEST_RUNNERS_LIST
+// from ../cli/next-test. In Next.js >=16.3.6 / 16.4+, next-test.js requires
+// ../lib/warn-missing-react-dependencies and other dev tools that are excluded from
+// standalone output traces. If missing or broken, patch them before server.js boots.
+function ensureNextStandaloneCompatibility() {
+  try {
+    const nextDistDirs = [
+      path.join(__dirname, "node_modules", "next", "dist"),
+      path.join(__dirname, ".next", "standalone", "node_modules", "next", "dist"),
+      path.join(__dirname, ".next-cli-build", "standalone", "node_modules", "next", "dist"),
+    ];
+
+    for (const nextDistDir of nextDistDirs) {
+      if (!fs.existsSync(nextDistDir)) continue;
+
+      const nextLibDir = path.join(nextDistDir, "lib");
+      const warnDepPath = path.join(nextLibDir, "warn-missing-react-dependencies.js");
+      if (!fs.existsSync(warnDepPath)) {
+        if (!fs.existsSync(nextLibDir)) fs.mkdirSync(nextLibDir, { recursive: true });
+        fs.writeFileSync(
+          warnDepPath,
+          `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.warnMissingReactDependencies = function () {};\n`,
+          "utf8"
+        );
+      }
+
+      const nextCliDir = path.join(nextDistDir, "cli");
+      const nextTestPath = path.join(nextCliDir, "next-test.js");
+      let needsStub = !fs.existsSync(nextTestPath);
+      if (!needsStub) {
+        try {
+          const content = fs.readFileSync(nextTestPath, "utf8");
+          if (content.includes("warn-missing-react-dependencies") || content.includes("get-project-dir")) {
+            needsStub = true;
+          }
+        } catch {
+          needsStub = true;
+        }
+      }
+
+      if (needsStub) {
+        if (!fs.existsSync(nextCliDir)) fs.mkdirSync(nextCliDir, { recursive: true });
+        fs.writeFileSync(
+          nextTestPath,
+          `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.SUPPORTED_TEST_RUNNERS_LIST = ["playwright"];\nexports.nextTest = async function () {};\n`,
+          "utf8"
+        );
+      }
+    }
+  } catch {
+    /* best effort */
+  }
+}
+
 if (require.main === module) {
+  ensureNextStandaloneCompatibility();
   const standalone = path.join(__dirname, "server.js");
   if (fs.existsSync(standalone)) {
     require(standalone);

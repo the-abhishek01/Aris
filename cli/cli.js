@@ -65,6 +65,7 @@ function createSpinner(text) {
 const pkg = require("./package.json");
 const { ensureSqliteRuntime, buildEnvWithRuntime } = require("./hooks/sqliteRuntime");
 const { ensureTrayRuntime } = require("./hooks/trayRuntime");
+const { ensureNextRuntime } = require("./hooks/nextRuntime");
 const args = process.argv.slice(2);
 
 // Subcommands (`9router xai video …`) run against an already-running gateway
@@ -91,6 +92,9 @@ if (args[0] === "update") {
     });
   return;
 }
+
+// Self-heal Next.js standalone runtime deps (next-test stub + warn-missing-react-dependencies)
+try { ensureNextRuntime({ silent: true }); } catch {}
 
 // Self-heal SQLite runtime deps (sql.js + better-sqlite3) into ~/.9router/runtime
 // so the server can resolve them via NODE_PATH. Best-effort — sql.js is required,

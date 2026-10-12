@@ -37,6 +37,26 @@ export function copyStandaloneAssets({ projectRoot = process.cwd(), distDir = pr
     cpSync(serverWrapperSource, serverWrapperDestination, { force: true });
     console.log(`[standalone-assets] Copied custom-server.js to ${serverWrapperDestination}`);
   }
+
+  // Ensure Next.js standalone compatibility (stubs next-test and warn-missing-react-dependencies)
+  const nextDistDir = resolve(standaloneDir, "node_modules", "next", "dist");
+  if (existsSync(nextDistDir)) {
+    const nextCliDir = resolve(nextDistDir, "cli");
+    const nextLibDir = resolve(nextDistDir, "lib");
+    const rootNextCli = resolve(projectRoot, "node_modules", "next", "dist", "cli");
+    if (!existsSync(nextCliDir) && existsSync(rootNextCli)) {
+      cpSync(rootNextCli, nextCliDir, { recursive: true });
+    }
+    const { writeFileSync, mkdirSync } = await import("node:fs");
+    if (!existsSync(nextCliDir)) mkdirSync(nextCliDir, { recursive: true });
+    writeFileSync(resolve(nextCliDir, "next-test.js"), `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.SUPPORTED_TEST_RUNNERS_LIST = ["playwright"];\nexports.nextTest = async function () {};\n`, "utf8");
+    if (!existsSync(nextLibDir)) mkdirSync(nextLibDir, { recursive: true });
+    const warnDep = resolve(nextLibDir, "warn-missing-react-dependencies.js");
+    if (!existsSync(warnDep)) {
+      writeFileSync(warnDep, `"use strict";\nObject.defineProperty(exports, "__esModule", { value: true });\nexports.warnMissingReactDependencies = function () {};\n`, "utf8");
+    }
+    console.log(`[standalone-assets] Applied Next.js standalone compatibility patches`);
+  }
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === resolve(dirname(fileURLToPath(import.meta.url)), "copy-standalone-assets.mjs")) {
