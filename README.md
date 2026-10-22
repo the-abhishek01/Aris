@@ -130,21 +130,21 @@ Run the one-line command for your operating system to install dependencies, conf
 
 #### 🍎 macOS / 🐧 Linux / 💻 WSL (Bash & Zsh)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/the-abhishek01/9router/master/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/the-abhishek01/Aris/master/install.sh | bash
 ```
 *Or using wget:*
 ```bash
-wget -qO- https://raw.githubusercontent.com/the-abhishek01/9router/master/install.sh | bash
+wget -qO- https://raw.githubusercontent.com/the-abhishek01/Aris/master/install.sh | bash
 ```
 
 #### 🪟 Windows (PowerShell)
 Open PowerShell and run:
 ```powershell
-irm https://raw.githubusercontent.com/the-abhishek01/9router/master/install.ps1 | iex
+irm https://raw.githubusercontent.com/the-abhishek01/Aris/master/install.ps1 | iex
 ```
 *Or via Windows Command Prompt (CMD) with `curl.exe`:*
 ```cmd
-curl.exe -fsSL https://raw.githubusercontent.com/the-abhishek01/9router/master/install.ps1 -o install.ps1 && powershell -ExecutionPolicy Bypass -File install.ps1
+curl.exe -fsSL https://raw.githubusercontent.com/the-abhishek01/Aris/master/install.ps1 -o install.ps1 && powershell -ExecutionPolicy Bypass -File install.ps1
 ```
 
 🎉 **Aris Gateway is now active!**
@@ -160,8 +160,8 @@ If you prefer to clone and inspect the repository manually:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/the-abhishek01/9router.git
-cd 9router
+git clone https://github.com/the-abhishek01/Aris.git
+cd Aris
 
 # 2. Install dependencies & build standalone package
 npm install
