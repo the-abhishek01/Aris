@@ -7,7 +7,7 @@ export default {
     icon: "explicit",
     color: "#F43F5E",
     textIcon: "UC",
-    website: "https://uncensored.com",
+    website: "https://uncensored.com/ai",
   },
   category: "webCookie",
   authType: "cookie",

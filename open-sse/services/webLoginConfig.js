@@ -61,17 +61,17 @@ export const WEB_LOGIN_CONFIGS = {
     },
   },
   "uc-web": {
-    loginUrl: "https://uncensored.com/",
+    loginUrl: "https://uncensored.com/ai",
     cookieDomain: ".uncensored.com",
     // Clerk hands every anonymous visitor a `__client` cookie, so its presence
     // alone would end the capture before the browser window even paints.
-    // `__client_uat` only becomes a real timestamp once a session exists.
+    // `__client_uat` becomes > 0 or `__session` is minted once signed in.
     tokenSources: [
       { type: "cookie", name: "__client" },
       {
         type: "cookie",
-        name: "__client_uat",
-        validateCookie: (value) => Number(value) > 0,
+        names: ["__client_uat", "__session"],
+        validateCookie: (value) => Number(value) > 0 || (typeof value === "string" && value.length > 20),
       },
     ],
   },
