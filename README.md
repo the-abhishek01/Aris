@@ -469,6 +469,18 @@ Direct browser and web session reverse gateways with automated anti-bot clearanc
   <table>
     <tr>
       <td align="center" width="160">
+        <b>⚡ Web2API Gateway</b><br/>
+        <sub><code>web2api</code><br/>Universal Web-to-API Bridge • Reverse Proxy</sub>
+      </td>
+      <td align="center" width="160">
+        <b>⚡ ChatGPT Web</b><br/>
+        <sub><code>chatgpt-web</code><br/>GPT-5.6 Sol & Luna • Session Auth</sub>
+      </td>
+      <td align="center" width="160">
+        <b>⚡ DeepSeek Web</b><br/>
+        <sub><code>deepseek-web</code><br/>DeepSeek V4 & R1 • userToken Auth</sub>
+      </td>
+      <td align="center" width="160">
         <b>⚡ Ox Alpha Web</b><br/>
         <sub><code>oxalpha-web</code><br/>Zero-Auth • Automated Turnstile • Tool Calling</sub>
       </td>
@@ -476,6 +488,8 @@ Direct browser and web session reverse gateways with automated anti-bot clearanc
         <b>⚡ Gemini Web</b><br/>
         <sub><code>gemini-web</code><br/>Official Gemini 2.5 Pro/Flash • Session Auth</sub>
       </td>
+    </tr>
+    <tr>
       <td align="center" width="160">
         <b>⚡ Grok Web</b><br/>
         <sub><code>grok-web</code><br/>xAI Grok Reasoning • Imagine Video</sub>
@@ -487,6 +501,14 @@ Direct browser and web session reverse gateways with automated anti-bot clearanc
       <td align="center" width="160">
         <b>⚡ Kiro AI</b><br/>
         <sub><code>kiro</code><br/>Claude 4.5 Sonnet + GLM-5 + MiniMax</sub>
+      </td>
+      <td align="center" width="160">
+        <b>⚡ Muse Web</b><br/>
+        <sub><code>muse-web</code><br/>Muse Web Sessions • Image & Text</sub>
+      </td>
+      <td align="center" width="160">
+        <b>⚡ UC Web</b><br/>
+        <sub><code>uc-web</code><br/>UC Browser AI Web Gateway</sub>
       </td>
     </tr>
   </table>

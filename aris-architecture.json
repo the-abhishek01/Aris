@@ -1,0 +1,437 @@
+{
+  "schema_version": 1,
+  "diagram_type": "architecture",
+  "meta": {
+    "title": "Aris (9Router) Architecture Overview",
+    "output": "aris-architecture.html",
+    "quality_profile": "showcase",
+    "repository": {
+      "url": "https://github.com/the-abhishek01/Aris",
+      "revision": "c8b1bdd513eb90b417b4c7671db203ccec778d54",
+      "provider": "github"
+    },
+    "viewBox": [
+      1280,
+      560
+    ],
+    "views": [
+      {
+        "id": "full-architecture",
+        "label": "Full System Architecture",
+        "focus": [
+          "clients",
+          "dashboard",
+          "custom-server",
+          "v1-gateway",
+          "chat-router",
+          "open-sse-core",
+          "sqlite-db",
+          "usage-db",
+          "translator",
+          "upstream-openai",
+          "upstream-anthropic",
+          "upstream-gemini"
+        ],
+        "note": "Complete topology from developer tools through Aris gateway to upstream AI providers."
+      },
+      {
+        "id": "v1-pipeline",
+        "label": "AI Request & Fallback Flow",
+        "focus": [
+          "clients",
+          "custom-server",
+          "v1-gateway",
+          "chat-router",
+          "open-sse-core",
+          "upstream-anthropic"
+        ],
+        "note": "Primary OpenAI-compatible request path with multi-account fallback and streaming."
+      },
+      {
+        "id": "translation-persistence",
+        "label": "Translation & State Tier",
+        "focus": [
+          "chat-router",
+          "open-sse-core",
+          "translator",
+          "sqlite-db",
+          "usage-db"
+        ],
+        "note": "Format translation matrix and multi-driver SQLite persistence for keys and usage."
+      }
+    ]
+  },
+  "components": [
+    {
+      "id": "clients",
+      "type": "external",
+      "label": "Developer AI Clients",
+      "sublabel": "Claude, Cursor, CLI",
+      "pos": [
+        40,
+        170
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "dashboard",
+      "type": "frontend",
+      "label": "Web Dashboard",
+      "sublabel": "Next.js 16 / React 19",
+      "brand": "next-js",
+      "pos": [
+        40,
+        290
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/app/landing/page.js",
+          "line": 1,
+          "label": "Dashboard landing page"
+        }
+      ]
+    },
+    {
+      "id": "custom-server",
+      "type": "backend",
+      "label": "Host Server",
+      "sublabel": "TCP IP & Refresh :20128",
+      "pos": [
+        250,
+        230
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "custom-server.js",
+          "line": 18,
+          "label": "Custom server & token refresh"
+        }
+      ]
+    },
+    {
+      "id": "v1-gateway",
+      "type": "backend",
+      "label": "V1 API Gateway",
+      "sublabel": "/v1/chat/completions",
+      "pos": [
+        460,
+        230
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/app/api/v1/chat/completions/route.js",
+          "line": 29,
+          "label": "OpenAI-compatible V1 route"
+        }
+      ]
+    },
+    {
+      "id": "sqlite-db",
+      "type": "database",
+      "label": "SQLite State DB",
+      "sublabel": "Multi-Driver Repos",
+      "brand": "sqlite",
+      "pos": [
+        670,
+        70
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "tag": "Adapter Chain",
+      "sources": [
+        {
+          "path": "src/lib/db/driver.js",
+          "line": 7,
+          "label": "Multi-driver SQLite adapter"
+        }
+      ]
+    },
+    {
+      "id": "chat-router",
+      "type": "backend",
+      "label": "Fallback Router",
+      "sublabel": "Combo & Account Loop",
+      "pos": [
+        670,
+        230
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/sse/handlers/chat.js",
+          "line": 33,
+          "label": "handleChat orchestrator"
+        }
+      ]
+    },
+    {
+      "id": "usage-db",
+      "type": "database",
+      "label": "Usage & Telemetry",
+      "sublabel": "usage.json + log.txt",
+      "pos": [
+        670,
+        390
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "src/lib/usageDb.js",
+          "line": 1,
+          "label": "Usage logging & cost metrics"
+        }
+      ]
+    },
+    {
+      "id": "open-sse-core",
+      "type": "backend",
+      "label": "Open-SSE Core",
+      "sublabel": "RTK & Dispatch Engine",
+      "pos": [
+        880,
+        230
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "tag": "RTK Enabled",
+      "sources": [
+        {
+          "path": "open-sse/handlers/chatCore.js",
+          "line": 62,
+          "label": "Core chat & streaming handler"
+        }
+      ]
+    },
+    {
+      "id": "translator",
+      "type": "backend",
+      "label": "Format Translator",
+      "sublabel": "OpenAI \u2194 Claude \u2194 Gemini",
+      "pos": [
+        880,
+        390
+      ],
+      "size": [
+        140,
+        60
+      ],
+      "sources": [
+        {
+          "path": "open-sse/translator/index.js",
+          "line": 53,
+          "label": "translateRequest matrix"
+        }
+      ]
+    },
+    {
+      "id": "upstream-openai",
+      "type": "cloud",
+      "label": "OpenAI Platform",
+      "sublabel": "GPT-4o & Compatible",
+      "brand": "openai",
+      "pos": [
+        1090,
+        70
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "upstream-anthropic",
+      "type": "cloud",
+      "label": "Anthropic Claude",
+      "sublabel": "Claude 3.7 Sonnet",
+      "brand": "anthropic",
+      "pos": [
+        1090,
+        230
+      ],
+      "size": [
+        140,
+        60
+      ]
+    },
+    {
+      "id": "upstream-gemini",
+      "type": "cloud",
+      "label": "Google Gemini",
+      "sublabel": "Gemini 2.5 Flash / Pro",
+      "brand": "google-gemini",
+      "pos": [
+        1090,
+        390
+      ],
+      "size": [
+        140,
+        60
+      ]
+    }
+  ],
+  "boundaries": [
+    {
+      "kind": "region",
+      "label": "Local Aris Gateway (Port :20128)",
+      "wraps": [
+        "custom-server",
+        "v1-gateway",
+        "chat-router",
+        "open-sse-core",
+        "sqlite-db",
+        "usage-db",
+        "translator"
+      ]
+    },
+    {
+      "kind": "security-group",
+      "label": "Open-SSE Core Engine",
+      "wraps": [
+        "open-sse-core",
+        "translator"
+      ]
+    }
+  ],
+  "connections": [
+    {
+      "id": "clients-to-server",
+      "from": "clients",
+      "to": "custom-server",
+      "label": "OpenAI /v1",
+      "variant": "emphasis"
+    },
+    {
+      "id": "dash-to-server",
+      "from": "dashboard",
+      "to": "custom-server",
+      "label": "Web UI",
+      "variant": "default"
+    },
+    {
+      "id": "server-to-gateway",
+      "from": "custom-server",
+      "to": "v1-gateway",
+      "label": "Socket IP",
+      "variant": "emphasis"
+    },
+    {
+      "id": "gateway-to-router",
+      "from": "v1-gateway",
+      "to": "chat-router",
+      "label": "handleChat",
+      "variant": "emphasis"
+    },
+    {
+      "id": "router-to-sqlite",
+      "from": "chat-router",
+      "to": "sqlite-db",
+      "label": "Credentials",
+      "fromSide": "top",
+      "toSide": "bottom",
+      "variant": "default"
+    },
+    {
+      "id": "router-to-usage",
+      "from": "chat-router",
+      "to": "usage-db",
+      "label": "Log usage",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 40,
+      "variant": "dashed"
+    },
+    {
+      "id": "router-to-core",
+      "from": "chat-router",
+      "to": "open-sse-core",
+      "label": "Fallback loop",
+      "variant": "emphasis"
+    },
+    {
+      "id": "core-to-translator",
+      "from": "open-sse-core",
+      "to": "translator",
+      "label": "Translate",
+      "fromSide": "bottom",
+      "toSide": "top",
+      "labelDy": 40,
+      "variant": "default"
+    },
+    {
+      "id": "core-to-openai",
+      "from": "open-sse-core",
+      "to": "upstream-openai",
+      "label": "OpenAI API",
+      "fromSide": "top",
+      "toSide": "left",
+      "variant": "default"
+    },
+    {
+      "id": "core-to-anthropic",
+      "from": "open-sse-core",
+      "to": "upstream-anthropic",
+      "label": "Claude API",
+      "variant": "emphasis"
+    },
+    {
+      "id": "core-to-gemini",
+      "from": "open-sse-core",
+      "to": "upstream-gemini",
+      "label": "Gemini API",
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Clients & Ingress",
+      "items": [
+        "Claude Code, Cursor, and web dashboard connect locally",
+        "Custom server strips spoofed headers and verifies TCP IP"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Open-SSE Core",
+      "items": [
+        "Model combo expansion and multi-account fallback loop",
+        "Zero-loss format translation between OpenAI, Claude, and Gemini",
+        "In-place RTK token compression for tool results"
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Persistence & Upstreams",
+      "items": [
+        "Multi-driver SQLite (bun/better-sqlite3/node/sql.js) for accounts & combos",
+        "Real-time usage tracking, token counting, and cost analytics",
+        "Dispatches to 40+ external providers over SSE/REST/Protobuf"
+      ]
+    }
+  ]
+}
