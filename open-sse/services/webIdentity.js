@@ -185,7 +185,7 @@ const PROBES = {
     let sid = decodeJwtPayload(client)?.sid;
     if (typeof sid !== "string" || !sid) {
       const list = await request("https://clerk.uncensored.com/v1/client?_clerk_js_version=5.127.1", {
-        headers: { Cookie: `__client=${client}`, Accept: "application/json", Origin: clerkOrigin, Referer: `${clerkOrigin}/` },
+        headers: { Cookie: credential, Accept: "application/json", Origin: clerkOrigin, Referer: `${clerkOrigin}/` },
       });
       if (!list.status) return UNKNOWN(list.error);
       if (list.status === 401 || list.status === 403) return REJECTED("Clerk session is invalid or expired");
@@ -195,12 +195,12 @@ const PROBES = {
       const payload = body?.response ?? body?.client ?? body;
       const sessions = Array.isArray(payload?.sessions) ? payload.sessions : [];
       const active = sessions.find((s) => s?.status === "active") ?? sessions[0];
-      sid = typeof active?.id === "string" ? active.id : "";
+      sid = payload?.last_active_session_id || (typeof active?.id === "string" ? active.id : "");
       if (!sid) return REJECTED("Not signed in to uncensored.com — use Login via Browser");
     }
     const res = await request(
       `https://clerk.uncensored.com/v1/client/sessions/${encodeURIComponent(sid)}/tokens?_clerk_js_version=5.127.1`,
-      { method: "POST", headers: { Cookie: `__client=${client}`, "Content-Type": "application/x-www-form-urlencoded", Origin: clerkOrigin }, body: "" }
+      { method: "POST", headers: { Cookie: credential, "Content-Type": "application/x-www-form-urlencoded", Origin: clerkOrigin }, body: "" }
     );
     if (!res.status) return UNKNOWN(res.error);
     if (res.status === 401 || res.status === 403) return REJECTED("Clerk session is invalid or expired");

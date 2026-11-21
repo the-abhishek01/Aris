@@ -171,7 +171,8 @@ async function resolveClerkSessionId(clientJwt, clerkHeaders, signal) {
   const payload = body?.response ?? body?.client ?? body;
   const sessions = Array.isArray(payload?.sessions) ? payload.sessions : [];
   const active = sessions.find((s) => s?.status === "active") ?? sessions[0];
-  return { sid: typeof active?.id === "string" ? active.id : "", rotatedClient };
+  const sid = payload?.last_active_session_id || (typeof active?.id === "string" ? active.id : "");
+  return { sid, rotatedClient };
 }
 
 /**

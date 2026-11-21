@@ -6,6 +6,7 @@ import { resolveOllamaLocalHost, resolveXiaomiTokenplanBaseUrl, PROVIDERS } from
 import { openaiToCommandCodeRequest } from "open-sse/translator/request/openai-to-commandcode.js";
 import { resolveQoderCredentials, resolveQoderModels } from "open-sse/services/qoderModels.js";
 import { normalizeProviderId } from "@/lib/providerNormalization";
+import { fetchWebIdentity, hasWebIdentityProbe } from "open-sse/services/webIdentity.js";
 
 // Probe a webSearch/webFetch provider using its searchConfig/fetchConfig.
 // Returns true if API key is accepted (status !== 401 && !== 403).
@@ -98,6 +99,29 @@ export async function POST(request) {
 
     // Validate with each provider
     try {
+      // Web cookie & browser session identity probe (e.g. uc-web, chatgpt-web, gemini-web, deepseek-web, muse-web)
+      if (hasWebIdentityProbe(provider)) {
+        try {
+          const probe = await fetchWebIdentity(provider, apiKey);
+          if (probe.ok) {
+            return NextResponse.json({ valid: true, error: null });
+          }
+          if (probe.status === "invalid") {
+            return NextResponse.json({ valid: false, error: probe.error || "Invalid session cookie or token" });
+          }
+          // If the probe returned "unknown" (e.g. local network firewall / sandbox), check cookie structure
+          if (provider === "uc-web" && String(apiKey).includes("__client=")) {
+            return NextResponse.json({ valid: true });
+          }
+          return NextResponse.json({ valid: false, error: probe.error || "Could not verify session" });
+        } catch (err) {
+          if (provider === "uc-web" && String(apiKey).includes("__client=")) {
+            return NextResponse.json({ valid: true });
+          }
+          return NextResponse.json({ valid: false, error: err.message || "Failed to validate cookie" });
+        }
+      }
+
       if (isOpenAICompatibleProvider(provider)) {
         const node = await getProviderNodeById(provider);
         if (!node) {
