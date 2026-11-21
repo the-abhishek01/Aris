@@ -186,8 +186,13 @@ async function resolveClerkSessionId(clientJwt, clerkHeaders, signal) {
  * persist it back to the connection.
  */
 async function mintSession(cookieHeader, signal) {
-  const jar = parseCookieJar(cookieHeader);
-  const client = jar.get("__client");
+  const raw = String(cookieHeader || "").trim();
+  const jar = parseCookieJar(raw);
+  let client = jar.get("__client");
+  if (!client && raw.startsWith("eyJ")) {
+    client = raw;
+    jar.set("__client", client);
+  }
   if (!client) {
     throw Object.assign(new Error("UC credential missing the __client cookie — paste the full uncensored.com Cookie header from a logged-in session"), { status: 401 });
   }

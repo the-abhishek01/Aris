@@ -176,8 +176,13 @@ const PROBES = {
   // The identity lives inside the Supabase SSR auth cookie — no network needed.
 
   async "uc-web"(credential) {
-    const jar = cookieJar(credential);
-    const client = jar.get("__client");
+    const raw = String(credential || "").trim();
+    const jar = cookieJar(raw);
+    let client = jar.get("__client");
+    if (!client && raw.startsWith("eyJ")) {
+      client = raw;
+      credential = `__client=${client}`;
+    }
     if (!client) return REJECTED("Missing __client cookie");
     const clerkOrigin = "https://uncensored.com";
     // Legacy __client JWTs carry `sid`; current ones only `{id, rotating_token}`,
@@ -208,9 +213,9 @@ const PROBES = {
     let json = null;
     try { json = JSON.parse(res.text); } catch { return UNKNOWN("Clerk returned invalid JSON"); }
     if (typeof json?.jwt !== "string" || !json.jwt) return REJECTED("Clerk did not mint a session token");
-    const uid = decodeJwtPayload(json.jwt)?.uid;
-    const email = typeof uid === "string" ? uid : "";
-    return OK(email.includes("@") ? email : "");
+    const claims = decodeJwtPayload(json.jwt);
+    const email = typeof claims?.email === "string" ? claims.email : (typeof claims?.uid === "string" && claims.uid.includes("@") ? claims.uid : "");
+    return OK(email);
   },
 
 

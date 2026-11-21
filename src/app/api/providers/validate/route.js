@@ -110,12 +110,12 @@ export async function POST(request) {
             return NextResponse.json({ valid: false, error: probe.error || "Invalid session cookie or token" });
           }
           // If the probe returned "unknown" (e.g. local network firewall / sandbox), check cookie structure
-          if (provider === "uc-web" && String(apiKey).includes("__client=")) {
+          if (provider === "uc-web" && (String(apiKey).includes("__client=") || String(apiKey).startsWith("eyJ"))) {
             return NextResponse.json({ valid: true });
           }
           return NextResponse.json({ valid: false, error: probe.error || "Could not verify session" });
         } catch (err) {
-          if (provider === "uc-web" && String(apiKey).includes("__client=")) {
+          if (provider === "uc-web" && (String(apiKey).includes("__client=") || String(apiKey).startsWith("eyJ"))) {
             return NextResponse.json({ valid: true });
           }
           return NextResponse.json({ valid: false, error: err.message || "Failed to validate cookie" });
